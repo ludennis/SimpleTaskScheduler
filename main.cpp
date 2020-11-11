@@ -1,44 +1,35 @@
 #include <chrono>
+#include <exception>
 #include <iostream>
 #include <mutex>
 #include <thread>
 
 typedef void (*Job) ();
 
+typedef void (*Error) (const std::exception &);
+
 class Scheduler
 {
 public:
-  Scheduler(const Job job, long time);
+  Scheduler(size_t size, Error error);
 
 private:
+  size_t mSize;
+  Error mError;
   std::mutex mMutx;
-  Job mJob;
-  long mTime;
 };
 
-/* time = microseconds */
-Scheduler::Scheduler(const Job job, long time)
-: mJob(job)
-, mTime(time)
+Scheduler::Scheduler(size_t size, Error error)
+: mSize(size)
+, mError(error)
 {}
-
-void hello(void)
-{
-  std::cout << "Hello" << std::endl;
-}
-
-void printInt(int x)
-{
-  std::cout << x << std::endl;
-}
 
 int main(int argc, char **argv)
 {
-  Job job1(hello);
-  Job job2(hello);
 
-  Scheduler(job1, 5000000);
-  Scheduler(job2, 1000000);
+  Scheduler(10, [](const std::exception &e) {
+    std::cout << "Error: " << e.what() << std::endl;
+  });
 
   return 0;
 }
