@@ -12,6 +12,7 @@ class Scheduler
 {
 public:
   Scheduler(size_t size, Error error);
+  void schedule(const Job job, long time);
 
 private:
   size_t mSize;
@@ -24,12 +25,22 @@ Scheduler::Scheduler(size_t size, Error error)
 , mError(error)
 {}
 
+void Scheduler::schedule(const Job job, long time)
+{
+  std::thread t(job);
+
+  t.join();
+}
+
 int main(int argc, char **argv)
 {
-
-  Scheduler(10, [](const std::exception &e) {
+  Scheduler scheduler(10, [](const std::exception &e) {
     std::cout << "Error: " << e.what() << std::endl;
   });
+
+  scheduler.schedule([]() {
+    std::cout << "Hello" << std::endl;
+  }, 1000000);
 
   return 0;
 }
