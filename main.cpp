@@ -1,27 +1,26 @@
 #include <chrono>
 #include <iostream>
+#include <mutex>
 #include <thread>
 
 typedef void (*Job) ();
 
 class Scheduler
 {
-private:
 public:
   Scheduler(const Job job, long time);
+
+private:
+  std::mutex mMutx;
+  Job mJob;
+  long mTime;
 };
 
 /* time = microseconds */
 Scheduler::Scheduler(const Job job, long time)
-{
-  // start job with a thread
-  std::this_thread::sleep_for(std::chrono::microseconds(time));
-
-  // execute job
-  std::thread t(job);
-
-  t.join();
-}
+: mJob(job)
+, mTime(time)
+{}
 
 void hello(void)
 {
